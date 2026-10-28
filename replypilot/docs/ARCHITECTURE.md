@@ -111,8 +111,10 @@ IP addresses are never stored in plain text. They are hashed with SHA-256 using
    `subscription_status`, `current_period_end` and `cancel_at_period_end` to the
    profile. Re-fetching makes the handler idempotent and safe against
    out-of-order delivery.
-3. `plan = 'pro'` while the subscription is `active` or `trialing`; anything else
-   falls back to `free`.
+3. `plan = 'pro'` while the subscription is `active`, `trialing` or `past_due`
+   (a grace period while Stripe retries a failed card). Anything else falls back
+   to `free`. Late events for a subscription that has since been replaced are
+   ignored, so they can't downgrade someone who re-subscribed.
 4. "Manage subscription" opens the Stripe Customer Portal (cancel, update card,
    invoices).
 

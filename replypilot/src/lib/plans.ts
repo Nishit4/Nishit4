@@ -41,9 +41,13 @@ export const PLANS: Record<PlanId, Plan> = {
   },
 };
 
-/** Subscription statuses that grant Pro access. */
+/**
+ * Subscription statuses that grant Pro access. `past_due` keeps access while
+ * Stripe retries the payment; once retries are exhausted Stripe moves the
+ * subscription to `canceled` or `unpaid` and the user drops back to Free.
+ */
 export function isProStatus(status: string | null | undefined): boolean {
-  return status === "active" || status === "trialing";
+  return status === "active" || status === "trialing" || status === "past_due";
 }
 
 export function planFor(profile: { plan: string } | null | undefined): Plan {

@@ -23,11 +23,12 @@ export function supabaseSecretKey() {
   return required("SUPABASE_SECRET_KEY", process.env.SUPABASE_SECRET_KEY);
 }
 
-export function stripeEnv() {
-  return {
-    secretKey: required("STRIPE_SECRET_KEY", process.env.STRIPE_SECRET_KEY),
-    proPriceId: required("STRIPE_PRO_PRICE_ID", process.env.STRIPE_PRO_PRICE_ID),
-  };
+export function stripeSecretKey() {
+  return required("STRIPE_SECRET_KEY", process.env.STRIPE_SECRET_KEY);
+}
+
+export function stripeProPriceId() {
+  return required("STRIPE_PRO_PRICE_ID", process.env.STRIPE_PRO_PRICE_ID);
 }
 
 export function stripeWebhookSecret() {
