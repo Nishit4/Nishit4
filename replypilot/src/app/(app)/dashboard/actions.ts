@@ -44,7 +44,13 @@ export async function generateRepliesAction(
   if (!business) redirect("/business");
 
   const plan = planFor(profile);
-  const allowed = await consumeReplyCredit(user.id, plan.monthlyReplyLimit);
+  let allowed: boolean;
+  try {
+    allowed = await consumeReplyCredit(user.id, plan.monthlyReplyLimit);
+  } catch (error) {
+    console.error("Failed to check reply quota", error);
+    return { status: "error", message: "Something went wrong. Please try again.", values };
+  }
   if (!allowed) {
     return {
       status: "error",

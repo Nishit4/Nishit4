@@ -29,9 +29,17 @@ export async function requireUser(): Promise<CurrentUser> {
   return user;
 }
 
-/** Only allow same-site relative redirects (blocks `//evil.com`). */
+/**
+ * Only allow same-site relative redirects. Blocks `//evil.com` and `/\evil.com`
+ * (browsers treat a backslash like a slash).
+ */
 export function safeRedirectPath(value: unknown, fallback = "/dashboard"): string {
-  if (typeof value !== "string" || !value.startsWith("/") || value.startsWith("//")) {
+  if (
+    typeof value !== "string" ||
+    !value.startsWith("/") ||
+    value.startsWith("//") ||
+    value.includes("\\")
+  ) {
     return fallback;
   }
   return value;
