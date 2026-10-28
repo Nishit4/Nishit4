@@ -36,7 +36,7 @@ Browser ──► Next.js on Vercel
 Server-only modules:
   lib/ai/*        → Claude API (the only place the Anthropic key is used)
   lib/supabase/admin.ts → service-role client (quota counters, billing fields, demo log)
-  lib/stripe.ts   → Stripe SDK
+  lib/billing/*   → Stripe SDK, customer creation, subscription sync
 ```
 
 ## Directory layout
@@ -46,21 +46,24 @@ src/
   proxy.ts                     session refresh + route protection
   app/
     page.tsx                   public landing page (hero, live demo, pricing, FAQ)
-    login/, signup/            auth pages
+    demo-actions.ts            Server Action behind the landing-page demo
+    (auth)/                    login + signup pages and their Server Actions
     auth/confirm/route.ts      email-confirmation link handler
     (app)/                     authenticated area (shared nav)
       dashboard/               generator + history
       business/                business profile (onboarding + edit)
       billing/                 plan, usage, upgrade / manage subscription
     api/stripe/webhook/        Stripe webhook endpoint
-  components/                  UI components (client components are marked)
+  components/                  shared UI; landing/ holds the marketing sections
   lib/
     ai/                        prompt building, output schema, Claude call
     supabase/                  server/admin clients, proxy helper, DB types
-    data/                      data-access functions (business, reviews, usage)
+    data/                      data-access functions (business, profile, reviews, usage)
+    billing/                   Stripe client, customer + subscription sync
     auth.ts                    current-user helpers (Data Access Layer)
     plans.ts                   plan catalogue (single source of truth for limits)
-    stripe.ts, env.ts, ...
+    demo.ts                    demo abuse protection (IP hashing, slots)
+    env.ts, validation.ts      typed env access, zod form schemas
 supabase/migrations/           SQL schema, RLS policies, RPC functions
 ```
 
@@ -68,7 +71,7 @@ supabase/migrations/           SQL schema, RLS policies, RPC functions
 
 ### 1. Generate replies (signed-in user)
 
-1. The dashboard form posts to the `generateReplies` Server Action.
+1. The dashboard form posts to the `generateRepliesAction` Server Action.
 2. The action re-checks the session, loads the user's business profile and plan.
 3. `consume_reply_credit(user, limit)` atomically increments this month's counter
    and refuses if the free limit is reached (Pro passes `null` = unlimited).
